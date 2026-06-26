@@ -54,7 +54,7 @@ jobs:
           out=$(gofmt -l .)
           if [ -n "$out" ]; then echo "Unformatted files:"; echo "$out"; exit 1; fi
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9 # v8 installs golangci-lint v2 (matches .golangci.yml schema)
+        uses: golangci/golangci-lint-action@v9 # v9 installs golangci-lint v2 (matches .golangci.yml schema)
         with:
           version: latest
 
