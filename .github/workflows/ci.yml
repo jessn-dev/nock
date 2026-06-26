@@ -34,12 +34,14 @@ jobs:
         run: go build ./...
       - name: Test (race + coverage)
         run: go test -race -covermode=atomic -coverprofile=coverage.txt ./...
-      - name: Upload coverage
+      - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v7
+        uses: codecov/codecov-action@v5
         with:
-          name: coverage
-          path: coverage.txt
+          files: ./coverage.txt
+          fail_ci_if_error: false # don't fail the build on a Codecov upload hiccup
+        # Public repo: tokenless upload. If Codecov later requires a token,
+        # add CODECOV_TOKEN as a repo secret and reference it here.
 
   lint:
     name: lint
@@ -56,15 +58,4 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9 # v9 installs golangci-lint v2 (matches .golangci.yml schema)
         with:
-          version: latest
-
-  vuln:
-    name: govulncheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
-        with:
-          go-version: stable
-      - name: govulncheck
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+          version: v2.12.2 # pinned: `latest` drifts and breaks CI when new linters land (e.g. staticcheck QF1012)

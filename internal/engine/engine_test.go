@@ -36,6 +36,14 @@ func TestSearchFindsByIntentAndName(t *testing.T) {
 	}
 }
 
+func TestSearchFindsByID(t *testing.T) {
+	e := New(fixture(), vars.New())
+	res := e.Search("nmap-sv")
+	if len(res) == 0 || res[0].Command.ID != "nmap-sv" {
+		t.Fatalf("expected nmap-sv first when searching by id, got %+v", res)
+	}
+}
+
 func TestSearchEmptyReturnsAll(t *testing.T) {
 	e := New(fixture(), vars.New())
 	if got := len(e.Search("")); got != 2 {
