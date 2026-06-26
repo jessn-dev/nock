@@ -303,8 +303,8 @@ func (m model) viewVars() string {
 	b.WriteString(titleStyle.Render("nock") + dimStyle.Render(" — fill variables") + "\n\n")
 	b.WriteString("  " + selectedStyle.Render(m.selected.ID) + "\n")
 	b.WriteString("  " + dimStyle.Render(m.selected.Command) + "\n\n")
-	b.WriteString(fmt.Sprintf("  variable %d of %d: %s\n",
-		m.varIdx+1, len(m.missing), titleStyle.Render("<"+m.missing[m.varIdx]+">")))
+	fmt.Fprintf(&b, "  variable %d of %d: %s\n",
+		m.varIdx+1, len(m.missing), titleStyle.Render("<"+m.missing[m.varIdx]+">"))
 	b.WriteString("  " + m.varIn.View() + "\n")
 	if m.status != "" {
 		b.WriteString("\n" + statusStyle.Render("  "+m.status) + "\n")

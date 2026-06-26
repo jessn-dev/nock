@@ -58,4 +58,4 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9 # v9 installs golangci-lint v2 (matches .golangci.yml schema)
         with:
-          version: latest
+          version: v2.12.2 # pinned: `latest` drifts and breaks CI when new linters land (e.g. staticcheck QF1012)
