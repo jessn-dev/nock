@@ -91,11 +91,13 @@ func (e *Engine) Get(id string) (format.Command, bool) {
 // Len reports how many commands are loaded.
 func (e *Engine) Len() int { return len(e.commands) }
 
-// searchText builds the haystack the fuzzy matcher scores against: name, intent,
-// description, and tags all contribute, so a query can hit any of them.
+// searchText builds the haystack the fuzzy matcher scores against: id, name,
+// intent, description, command, and tags all contribute, so a query can hit any
+// of them. The id is included so operators can recall a command by its stable
+// identifier (e.g. "nmap-sv"), not only its prose fields.
 func searchText(c format.Command) string {
-	parts := make([]string, 0, 4+len(c.Tags))
-	parts = append(parts, c.Name, c.Intent, c.Description, c.Command)
+	parts := make([]string, 0, 5+len(c.Tags))
+	parts = append(parts, c.ID, c.Name, c.Intent, c.Description, c.Command)
 	parts = append(parts, c.Tags...)
 	return strings.Join(parts, " ")
 }

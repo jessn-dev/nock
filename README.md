@@ -1,13 +1,34 @@
 # nock
 
+<!-- Build & Quality -->
 [![CI](https://github.com/jessn-dev/nock/actions/workflows/ci.yml/badge.svg)](https://github.com/jessn-dev/nock/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/jessn-dev/nock/actions/workflows/codeql.yml/badge.svg)](https://github.com/jessn-dev/nock/actions/workflows/codeql.yml)
+[![govulncheck](https://github.com/jessn-dev/nock/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/jessn-dev/nock/actions/workflows/govulncheck.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/jessn-dev/nock/badge)](https://securityscorecards.dev/viewer/?uri=github.com/jessn-dev/nock)
+[![codecov](https://codecov.io/gh/jessn-dev/nock/branch/main/graph/badge.svg)](https://codecov.io/gh/jessn-dev/nock)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jessn-dev/nock)](https://goreportcard.com/report/github.com/jessn-dev/nock)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jessn-dev/nock.svg)](https://pkg.go.dev/github.com/jessn-dev/nock)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/jessn-dev/nock)](go.mod)
+
+<!-- Release & License -->
 [![Release](https://img.shields.io/github/v/release/jessn-dev/nock?include_prereleases&sort=semver)](https://github.com/jessn-dev/nock/releases)
+[![Downloads](https://img.shields.io/github/downloads/jessn-dev/nock/total)](https://github.com/jessn-dev/nock/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/jessn-dev/nock)](go.mod)
+[![cheatsheet schema](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjessn-dev%2Fnock%2Fmain%2Fpkg%2Fformat%2Fschema.json&query=%24.properties.schema_version.const&prefix=v&label=cheatsheet%20schema&color=blue)](pkg/format/schema.json)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+
+<!-- Development & Activity -->
+[![Last commit](https://img.shields.io/github/last-commit/jessn-dev/nock)](https://github.com/jessn-dev/nock/commits)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/jessn-dev/nock)](https://github.com/jessn-dev/nock/pulse)
+[![Contributors](https://img.shields.io/github/contributors/jessn-dev/nock)](https://github.com/jessn-dev/nock/graphs/contributors)
+[![Open issues](https://img.shields.io/github/issues/jessn-dev/nock)](https://github.com/jessn-dev/nock/issues)
+[![Open PRs](https://img.shields.io/github/issues-pr/jessn-dev/nock)](https://github.com/jessn-dev/nock/pulls)
+[![Code size](https://img.shields.io/github/languages/code-size/jessn-dev/nock)](https://github.com/jessn-dev/nock)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+<!-- Community / Traffic (privacy-respecting: no third-party trackers) -->
+[![Stars](https://img.shields.io/github/stars/jessn-dev/nock?style=social)](https://github.com/jessn-dev/nock/stargazers)
+[![Forks](https://img.shields.io/github/forks/jessn-dev/nock?style=social)](https://github.com/jessn-dev/nock/network/members)
+[![Watchers](https://img.shields.io/github/watchers/jessn-dev/nock?style=social)](https://github.com/jessn-dev/nock/watchers)
 
 > Nock the command, draw, fire.
 
@@ -105,8 +126,21 @@ placeholders, resolved from the variable store:
 }
 ```
 
-> YAML is the intended primary authoring format and lands in Milestone 0/1; the
-> scaffold loads JSON so it builds with zero dependencies.
+YAML is the primary authoring format; JSON is accepted for tooling and
+interchange. The codec is chosen by file extension, and a sheet round-trips
+through either into the same structs.
+
+## Documentation
+
+Versioned, in-repo docs live in [`docs/`](docs/):
+
+- [Install](docs/install.md) — source, `go install`, release binaries.
+- [CLI reference](docs/cli.md) — every mode and flag.
+- [Cheatsheet schema](docs/schema.md) — the `pkg/format` authoring contract.
+- [MCP setup](docs/mcp.md) — exposing nock to AI agents (Milestone 3).
+
+Narrative and community content (tutorials, FAQ, operator workflows) lives in the
+[Wiki](https://github.com/jessn-dev/nock/wiki).
 
 ## Architecture
 

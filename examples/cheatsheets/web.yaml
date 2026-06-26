@@ -1,0 +1,27 @@
+schema_version: "1"
+name: web
+description: Web application probing starter commands.
+author: nock
+license: Apache-2.0
+commands:
+  - id: whatweb-fingerprint
+    name: whatweb fingerprint
+    command: whatweb -a 3 <url>
+    description: Aggressive fingerprint of the web stack behind a URL.
+    intent: identify the web server, framework, and technologies in use
+    tags: [web, fingerprint, whatweb, enumeration]
+    risk: low
+  - id: nuclei-scan
+    name: nuclei template scan
+    command: nuclei -u <url> -severity medium,high,critical -o nuclei-<target>.txt
+    description: Run community templates, keep medium-and-up findings.
+    intent: scan a target for known web vulnerabilities and misconfigurations
+    tags: [web, nuclei, vuln, scan]
+    risk: medium
+  - id: curl-headers
+    name: curl response headers
+    command: curl -sSI <url>
+    description: Fetch only the HTTP response headers.
+    intent: inspect security headers and server banners without a full request
+    tags: [web, curl, headers, recon]
+    risk: info

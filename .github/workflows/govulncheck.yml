@@ -1,0 +1,32 @@
+name: govulncheck
+
+# Scans the dependency tree for known Go vulnerabilities. Split into its own
+# workflow (rather than a job in ci.yml) so it carries a standalone status badge.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  schedule:
+    - cron: "27 6 * * 1" # weekly, catches newly-disclosed vulns in pinned deps
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: govulncheck-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version: stable
+          check-latest: true
+      - name: govulncheck
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
