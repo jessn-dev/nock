@@ -25,8 +25,8 @@ jobs:
       run:
         shell: bash # consistent across OSes; avoids PowerShell arg-parsing quirks
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
           check-latest: true
@@ -36,7 +36,7 @@ jobs:
         run: go test -race -covermode=atomic -coverprofile=coverage.txt ./...
       - name: Upload coverage
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: coverage.txt
@@ -45,8 +45,8 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
       - name: gofmt check
@@ -54,7 +54,7 @@ jobs:
           out=$(gofmt -l .)
           if [ -n "$out" ]; then echo "Unformatted files:"; echo "$out"; exit 1; fi
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8 # v8 installs golangci-lint v2 (matches .golangci.yml schema)
+        uses: golangci/golangci-lint-action@v9 # v8 installs golangci-lint v2 (matches .golangci.yml schema)
         with:
           version: latest
 
@@ -62,8 +62,8 @@ jobs:
     name: govulncheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
         with:
           go-version: stable
       - name: govulncheck
