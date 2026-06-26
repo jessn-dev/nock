@@ -1,0 +1,27 @@
+# Binaries
+/bin/
+/dist/
+nock
+*.exe
+*.test
+*.out
+
+# Coverage
+coverage.txt
+coverage.html
+*.cover
+
+# Go build/test cache artifacts
+/vendor/
+
+# Editor / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Local config & secrets — never commit API keys
+.env
+.env.*
+*.local
+nock.local.*

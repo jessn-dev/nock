@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an idea for nock
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that nock makes hard today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: Related milestone
+      options:
+        - "M1 Engine"
+        - "M2 TUI"
+        - "M3 MCP server"
+        - "M4 AI ranker"
+        - "M5 Team / sync"
+        - "Unsure"
+    validations:
+      required: true

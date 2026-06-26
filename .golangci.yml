@@ -1,0 +1,45 @@
+# golangci-lint configuration for nock.
+# Strict but pragmatic: catches real bugs and style drift without drowning the
+# signal. Docs: https://golangci-lint.run
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - bodyclose      # HTTP response bodies must be closed (matters for AI providers)
+    - copyloopvar
+    - errorlint      # correct error wrapping/comparison
+    - gocritic
+    - gosec          # security issues — important for a pentest tool's own hygiene
+    - misspell
+    - nilerr
+    - prealloc
+    - revive
+    - unconvert
+    - unparam
+    - whitespace
+  settings:
+    revive:
+      rules:
+        - name: exported
+          arguments: [checkPrivateReceivers]
+    gosec:
+      excludes:
+        - G204  # subprocess launched with variable — nock's whole purpose is launching commands
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/jessn-dev/nock
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

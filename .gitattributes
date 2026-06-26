@@ -1,0 +1,16 @@
+# Normalize line endings
+* text=auto eol=lf
+
+*.go text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Keep binaries out of diffs
+*.png binary
+*.jpg binary
+*.gif binary
+
+# Collapse generated/vendor noise in PR diffs
+go.sum linguist-generated=true

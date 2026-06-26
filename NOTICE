@@ -1,0 +1,17 @@
+nock
+Copyright 2026 nock authors
+
+This product includes software developed by the nock authors.
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+---
+
+nock is inspired by Orange-Cyberdefense/arsenal
+(https://github.com/Orange-Cyberdefense/arsenal), which is licensed under
+GPL-3.0. nock is an independent, clean-room implementation in Go: no arsenal
+source code is copied into this project.
+
+Arsenal's cheatsheet *content* (its command data) remains licensed under GPL-3.0
+and is NOT distributed as part of nock. nock provides an importer that lets users
+fetch and convert that content onto their own machines; it is never bundled into
+this repository or the nock binary. See ROADMAP.md ("import, never bundle").

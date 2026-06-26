@@ -1,0 +1,55 @@
+{
+  "schema_version": "1",
+  "name": "recon",
+  "description": "Network and web reconnaissance starter commands.",
+  "author": "nock",
+  "license": "Apache-2.0",
+  "commands": [
+    {
+      "id": "nmap-service-scan",
+      "name": "nmap service/version scan",
+      "command": "nmap -sV -sC -oA scans/<target> <target>",
+      "description": "Default scripts + version detection, output to scans/.",
+      "intent": "identify open ports and the service versions behind them",
+      "tags": ["nmap", "scan", "ports", "enumeration"],
+      "risk": "low"
+    },
+    {
+      "id": "nmap-full-tcp",
+      "name": "nmap full TCP port sweep",
+      "command": "nmap -p- --min-rate 5000 -oA scans/<target>-allports <target>",
+      "description": "All 65535 TCP ports, fast rate.",
+      "intent": "find every open TCP port including non-standard ones",
+      "tags": ["nmap", "scan", "ports"],
+      "risk": "low"
+    },
+    {
+      "id": "gobuster-dir",
+      "name": "gobuster directory brute force",
+      "command": "gobuster dir -u <url> -w <wordlist> -t 50 -o gobuster-<target>.txt",
+      "description": "Brute force web content with a wordlist.",
+      "intent": "discover hidden web directories and files",
+      "tags": ["web", "brute", "content-discovery", "gobuster"],
+      "risk": "medium"
+    },
+    {
+      "id": "ffuf-vhost",
+      "name": "ffuf virtual host discovery",
+      "command": "ffuf -u http://<target> -H 'Host: FUZZ.<domain>' -w <wordlist> -fc 302",
+      "description": "Fuzz the Host header to find virtual hosts.",
+      "intent": "enumerate virtual hosts served by the target",
+      "tags": ["web", "ffuf", "vhost", "enumeration"],
+      "risk": "medium"
+    },
+    {
+      "id": "crackmapexec-smb",
+      "name": "crackmapexec SMB enumeration",
+      "command": "crackmapexec smb <target> -u <user> -p <password> --shares",
+      "description": "Authenticate over SMB and list shares.",
+      "intent": "enumerate SMB shares with valid credentials",
+      "tags": ["smb", "windows", "crackmapexec", "credentials"],
+      "risk": "medium",
+      "requires_auth": true
+    }
+  ]
+}

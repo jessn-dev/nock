@@ -1,0 +1,73 @@
+# GoReleaser builds nock's single static binary for every platform and publishes
+# it. Docs: https://goreleaser.com
+version: 2
+
+project_name: nock
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: nock
+    main: ./cmd/nock
+    binary: nock
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/jessn-dev/nock/internal/version.Version={{.Version}}
+      - -X github.com/jessn-dev/nock/internal/version.Commit={{.ShortCommit}}
+      - -X github.com/jessn-dev/nock/internal/version.Date={{.Date}}
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+
+archives:
+  - formats: [tar.gz]
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - NOTICE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+sboms:
+  - artifacts: archive
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  use: github
+  sort: asc
+  groups:
+    - title: Features
+      regexp: '^feat'
+      order: 0
+    - title: Fixes
+      regexp: '^fix'
+      order: 1
+    - title: Others
+      order: 99
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+
+# Homebrew tap — uncomment and create the tap repo when ready to ship Milestone 2.
+# brews:
+#   - repository:
+#       owner: jessn-dev
+#       name: homebrew-tap
+#     homepage: https://github.com/jessn-dev/nock
+#     description: "AI-aware command launcher for pentesters and operators"
+#     license: Apache-2.0

@@ -1,0 +1,5 @@
+# Default owners for everything in the repo.
+* @jessn-dev
+
+# The cheatsheet schema is the stable public contract — review changes carefully.
+/pkg/format/ @jessn-dev
