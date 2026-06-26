@@ -105,8 +105,21 @@ placeholders, resolved from the variable store:
 }
 ```
 
-> YAML is the intended primary authoring format and lands in Milestone 0/1; the
-> scaffold loads JSON so it builds with zero dependencies.
+YAML is the primary authoring format; JSON is accepted for tooling and
+interchange. The codec is chosen by file extension, and a sheet round-trips
+through either into the same structs.
+
+## Documentation
+
+Versioned, in-repo docs live in [`docs/`](docs/):
+
+- [Install](docs/install.md) — source, `go install`, release binaries.
+- [CLI reference](docs/cli.md) — every mode and flag.
+- [Cheatsheet schema](docs/schema.md) — the `pkg/format` authoring contract.
+- [MCP setup](docs/mcp.md) — exposing nock to AI agents (Milestone 3).
+
+Narrative and community content (tutorials, FAQ, operator workflows) lives in the
+[Wiki](https://github.com/jessn-dev/nock/wiki).
 
 ## Architecture
 
