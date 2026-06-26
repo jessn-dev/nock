@@ -128,6 +128,19 @@ type Provider interface {
       never auto-run on nock's behalf)
 - [ ] command history
 - [ ] Ship: GitHub Releases, Homebrew tap, `go install`, AUR
+- [ ] **Launch-day: enable GitHub Discussions** (community + traction, feeds the funding
+      story — sponsors/grants want a visible community). Categories: Announcements,
+      Cheatsheets (share/request sheets — seeds the M5 team-sync content library and proves
+      demand), Q&A, Ideas, Show & tell. Time it *with* the v1 launch, not before — an empty
+      forum reads as a dead project. Pin a norms post: shared cheatsheets are untrusted,
+      attacker-controlled input (ADR 009 threat model); nock shows the resolved command and
+      never auto-runs — review every command before firing.
+- [ ] **Docs, split by stability:**
+  - **In-repo `/docs`** (versioned, PR-reviewed, ships with the tag) for anything that must
+    track a release: `pkg/format` cheatsheet schema, CLI reference, MCP setup, install. Docs
+    that define the contract live next to the code that enforces it, so they can't silently drift.
+  - **GitHub Wiki** for narrative/community content (tutorials, FAQ, operator workflows,
+    contributor notes) — low-stakes if it lags a release; a separate repo, no PR gate.
 
 ### Milestone 3 — MCP server ("install to AI tools")
 - [ ] `nock --mcp` stdio server over engine
