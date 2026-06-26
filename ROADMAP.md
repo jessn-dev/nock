@@ -120,7 +120,12 @@ type Provider interface {
 
 ### Milestone 2 — TUI (shippable v1)
 - [ ] bubbletea list + search + var prompts
-- [ ] tmux pane / prefill-into-shell output
+- [ ] **Show-before-fire (security, hard rule):** always display the fully-resolved command
+      to the operator before any execution/prefill. What is displayed must equal what runs —
+      no hidden expansion, no auto-execution. This is the primary mitigation for the
+      malicious-cheatsheet injection vector and must be designed in now, not retrofitted.
+- [ ] tmux pane / prefill-into-shell output (prefill into the shell line, operator hits Enter —
+      never auto-run on nock's behalf)
 - [ ] command history
 - [ ] Ship: GitHub Releases, Homebrew tap, `go install`, AUR
 

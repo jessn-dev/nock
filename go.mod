@@ -8,3 +8,5 @@ go 1.26
 //   - github.com/anthropics/anthropic-sdk-go (Milestone 4 — AI ranker)
 //   - github.com/goccy/go-yaml            (Milestone 0/1 — cheatsheet parsing)
 // The scaffold is stdlib-only so it builds and tests offline with zero network.
+
+require github.com/goccy/go-yaml v1.19.2

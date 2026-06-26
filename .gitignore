@@ -14,6 +14,20 @@ coverage.html
 # Go build/test cache artifacts
 /vendor/
 
+# agenticscope — dev-only context tooling, never a nock dependency.
+# Keep ALL of its artifacts (config, fragments, generated vendor files, MCP wiring,
+# and the Node install) out of this Go repo.
+/node_modules/
+/package.json
+/package-lock.json
+/agenticscope.toml
+/.scope/
+/.mcp.json
+/CLAUDE.md
+/GEMINI.md
+/AGENTS.md
+/.cursorrules
+
 # Editor / OS
 .DS_Store
 *.swp

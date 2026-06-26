@@ -1,11 +1,10 @@
 // Package cheatsheet loads and validates cheatsheet files from disk into the
 // format types the engine consumes.
 //
-// Scaffold status: this loader handles JSON (.json) using the standard library so
-// the project builds and tests with zero external dependencies. YAML (.yaml/.yml)
-// — the primary authoring format — is wired in during Milestone 0/1 via
-// github.com/goccy/go-yaml; LoadFile returns errUnsupportedYAML until then. Keeping
-// the seam here means the engine never changes when YAML lands.
+// Both JSON (.json) and YAML (.yaml/.yml) are supported. YAML is the primary
+// authoring format; JSON is accepted for tooling and interchange. The format
+// types carry matching json/yaml struct tags, so a sheet round-trips through
+// either codec into the same engine-facing structs.
 package cheatsheet
 
 import (
@@ -17,12 +16,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/goccy/go-yaml"
+
 	"github.com/jessn-dev/nock/pkg/format"
 )
 
-var errUnsupportedYAML = errors.New("cheatsheet: YAML support arrives in Milestone 0/1 (goccy/go-yaml); use .json for now")
-
-// LoadFile reads and validates a single cheatsheet file.
+// LoadFile reads and validates a single cheatsheet file. The codec is chosen by
+// file extension: .json uses encoding/json, .yaml/.yml uses goccy/go-yaml.
 func LoadFile(path string) (format.Cheatsheet, error) {
 	// Loading a user-specified cheatsheet file by path is the intended behaviour;
 	// the operator chooses which of their own files to load.
@@ -37,7 +37,9 @@ func LoadFile(path string) (format.Cheatsheet, error) {
 			return format.Cheatsheet{}, fmt.Errorf("cheatsheet: parse %s: %w", path, err)
 		}
 	case ".yaml", ".yml":
-		return format.Cheatsheet{}, fmt.Errorf("%s: %w", path, errUnsupportedYAML)
+		if err := yaml.Unmarshal(data, &cs); err != nil {
+			return format.Cheatsheet{}, fmt.Errorf("cheatsheet: parse %s: %w", path, err)
+		}
 	default:
 		return format.Cheatsheet{}, fmt.Errorf("cheatsheet: unknown extension for %s", path)
 	}
