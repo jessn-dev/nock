@@ -1,5 +1,14 @@
 # nock
 
+[![CI](https://github.com/jessn-dev/nock/actions/workflows/ci.yml/badge.svg)](https://github.com/jessn-dev/nock/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/jessn-dev/nock/actions/workflows/codeql.yml/badge.svg)](https://github.com/jessn-dev/nock/actions/workflows/codeql.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jessn-dev/nock)](https://goreportcard.com/report/github.com/jessn-dev/nock)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jessn-dev/nock.svg)](https://pkg.go.dev/github.com/jessn-dev/nock)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/jessn-dev/nock)](go.mod)
+[![Release](https://img.shields.io/github/v/release/jessn-dev/nock?include_prereleases&sort=semver)](https://github.com/jessn-dev/nock/releases)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 > Nock the command, draw, fire.
 
 **nock** is an AI-aware command launcher for pentesters and operators. It holds the

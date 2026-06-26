@@ -94,7 +94,8 @@ func (e *Engine) Len() int { return len(e.commands) }
 // searchText builds the haystack the fuzzy matcher scores against: name, intent,
 // description, and tags all contribute, so a query can hit any of them.
 func searchText(c format.Command) string {
-	parts := []string{c.Name, c.Intent, c.Description, c.Command}
+	parts := make([]string, 0, 4+len(c.Tags))
+	parts = append(parts, c.Name, c.Intent, c.Description, c.Command)
 	parts = append(parts, c.Tags...)
 	return strings.Join(parts, " ")
 }

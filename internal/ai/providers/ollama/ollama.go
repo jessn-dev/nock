@@ -36,6 +36,7 @@ func New(cfg Config) *Provider {
 	return &Provider{cfg: cfg}
 }
 
+// Name identifies this provider.
 func (p *Provider) Name() string { return "ollama" }
 
 // Suggest is not yet implemented; the ranker falls back to fuzzy order until it is.

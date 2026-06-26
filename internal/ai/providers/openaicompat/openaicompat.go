@@ -37,6 +37,7 @@ func New(cfg Config) *Provider {
 	return &Provider{cfg: cfg}
 }
 
+// Name identifies this provider.
 func (p *Provider) Name() string { return "openai-compat" }
 
 // Suggest is not yet implemented; the ranker falls back to fuzzy order until it is.

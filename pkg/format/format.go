@@ -22,6 +22,8 @@ const SchemaVersion = "1"
 // the AI ranker can de-prioritise high-risk commands unless intent calls for them.
 type Risk string
 
+// Risk levels, from least to most impactful. RiskUnspecified means the author
+// did not classify the command.
 const (
 	RiskInfo        Risk = "info"   // passive, read-only (e.g. nslookup)
 	RiskLow         Risk = "low"    // active but benign (e.g. a port scan)
@@ -97,11 +99,12 @@ func (cs Cheatsheet) Validate() error {
 	ids := map[string]bool{}
 	for i, cmd := range cs.Commands {
 		where := fmt.Sprintf("command[%d]", i)
-		if strings.TrimSpace(cmd.ID) == "" {
+		switch {
+		case strings.TrimSpace(cmd.ID) == "":
 			errs = append(errs, fmt.Errorf("%w: %s: id is required", ErrValidation, where))
-		} else if ids[cmd.ID] {
+		case ids[cmd.ID]:
 			errs = append(errs, fmt.Errorf("%w: %s: duplicate id %q", ErrValidation, where, cmd.ID))
-		} else {
+		default:
 			ids[cmd.ID] = true
 		}
 		if strings.TrimSpace(cmd.Command) == "" {

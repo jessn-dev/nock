@@ -24,7 +24,9 @@ var errUnsupportedYAML = errors.New("cheatsheet: YAML support arrives in Milesto
 
 // LoadFile reads and validates a single cheatsheet file.
 func LoadFile(path string) (format.Cheatsheet, error) {
-	data, err := os.ReadFile(path)
+	// Loading a user-specified cheatsheet file by path is the intended behaviour;
+	// the operator chooses which of their own files to load.
+	data, err := os.ReadFile(path) //nolint:gosec // G304: path is operator-supplied by design
 	if err != nil {
 		return format.Cheatsheet{}, fmt.Errorf("cheatsheet: read %s: %w", path, err)
 	}
