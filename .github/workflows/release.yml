@@ -24,3 +24,9 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Cross-repo push to the Homebrew tap. Empty until the secret is added (see
+          # .goreleaser.yaml); the cask step fails loudly if unset on a real tag, which
+          # is the signal to finish the one-time tap setup.
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          # AUR_KEY: re-add when the AUR block is re-enabled (signups are frozen; see
+          # .goreleaser.yaml). AUR_KEY: ${{ secrets.AUR_KEY }}

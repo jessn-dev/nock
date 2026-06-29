@@ -180,6 +180,7 @@ Versioned, in-repo docs live in [`docs/`](docs/):
 - [MCP setup](docs/mcp.md) — exposing nock to AI agents (Milestone 3).
 - [Contributing](CONTRIBUTING.md) — dev loop, git-flow branching, and the
   CodeRabbit review workflow (`@coderabbitai review` on PRs to `develop`/`main`).
+- [Releasing](RELEASING.md) — how a version tag becomes a cross-platform release.
 
 Narrative and community content (tutorials, FAQ, operator workflows) lives in the
 [Wiki](https://github.com/jessn-dev/nock/wiki).

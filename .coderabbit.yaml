@@ -8,9 +8,10 @@ language: en-US
 early_access: false
 
 reviews:
-  # CHILL keeps the signal high — fewer, higher-confidence findings — matching how
-  # this repo reviews (correctness + security over nitpicks).
-  profile: chill
+  # ASSERTIVE surfaces more findings, including lower-confidence nitpicks — chosen
+  # deliberately for a solo, security-sensitive project where a second reviewer's
+  # breadth matters more than a quiet PR.
+  profile: assertive
   request_changes_workflow: false
   high_level_summary: true
   poem: false
