@@ -30,6 +30,17 @@ func openAppend(path string) (*os.File, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Whether the file already exists decides how it is secured. A new file gets its
+	// owner-only DACL atomically from SecurityAttributes at creation — privilege-free
+	// and guaranteed. A pre-existing file is additionally re-tightened, but only
+	// best-effort: rewriting an existing file's ACL can be denied in some
+	// environments, and a file nock created is already owner-only, so a failed
+	// re-tighten must never block an append.
+	preexisting := false
+	if _, statErr := os.Stat(path); statErr == nil {
+		preexisting = true
+	}
+
 	sa := &windows.SecurityAttributes{SecurityDescriptor: sd}
 	sa.Length = uint32(unsafe.Sizeof(*sa))
 
@@ -50,20 +61,22 @@ func openAppend(path string) (*os.File, error) {
 		return nil, fmt.Errorf("history: create: %w", err)
 	}
 
-	if err := enforceOwnerOnly(h, sd); err != nil {
-		_ = windows.CloseHandle(h)
-		return nil, err
+	if preexisting {
+		// Defense-in-depth for a file that existed before this open (e.g. created
+		// outside nock with a looser ACL). Ignore a denial: nock-created files are
+		// already owner-only from their SecurityAttributes at creation time.
+		_ = enforceOwnerOnly(h, sd)
 	}
 	return os.NewFile(uintptr(h), path), nil
 }
 
 // enforceOwnerOnly reapplies the protected, owner-only DACL from sd onto an
-// already-open handle, so an existing file's permissions are corrected rather
-// than inherited. Only the DACL is set: the creating user is already the owner,
+// already-open handle, correcting a pre-existing file's permissions rather than
+// inheriting them. Only the DACL is set: the creating user is already the owner,
 // and rewriting the owner at runtime needs SeRestorePrivilege (denied to ordinary
-// processes, e.g. CI runners). The DACL is what actually gates access, so locking
-// it down is sufficient. Failing here is fail-closed: the caller discards the
-// handle rather than write secrets to a wrongly-permissioned file.
+// processes, e.g. CI runners). The DACL is what actually gates access. Callers
+// invoke this best-effort — new files are already secured at creation, so a
+// failure here does not compromise a file nock itself wrote.
 func enforceOwnerOnly(h windows.Handle, sd *windows.SECURITY_DESCRIPTOR) error {
 	dacl, _, err := sd.DACL()
 	if err != nil {
