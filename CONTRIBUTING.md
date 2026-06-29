@@ -44,6 +44,29 @@ milestone — see `ROADMAP.md`.
 - Keep PRs focused; add tests for behavior changes.
 - Fill in the PR template checklist. CI must be green.
 
+### Branching (git-flow)
+
+Feature work branches off `develop`, never `main`: `feature -> develop`, and
+`develop -> main` only at release. Open PRs against `develop`; the
+`develop -> main` PR is the release cut.
+
+### Automated review (CodeRabbit)
+
+**Why, on a solo project:** nock is single-maintainer, so there is no second
+human reviewer to catch what the author misses. nock also *launches commands* —
+it has to be safe for public use — so a bug or a permissions gap is a security
+issue, not just a defect. CodeRabbit is the cheap, always-on "second pair of
+eyes" that fills that gap: it already caught a real secrets-at-rest hole (history
+files created before a fix kept loose permissions). It is a reviewer, not a gate
+— it never blocks a merge and the maintainer decides every change.
+
+PRs into `develop` and `main` are reviewed automatically by
+[CodeRabbit](https://coderabbit.ai), configured in [`.coderabbit.yaml`](.coderabbit.yaml)
+(CHILL profile, scoped to those two base branches). To (re)trigger a pass after
+pushing fixes, comment `@coderabbitai review` on the PR. Treat its findings as
+review input: verify each against the code, fix the valid ones, and say why
+you're skipping the rest.
+
 ## Licensing of contributions
 
 By contributing, you agree your contributions are licensed under the project's

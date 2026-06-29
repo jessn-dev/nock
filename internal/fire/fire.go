@@ -73,11 +73,15 @@ func Emit(t Target, cmd string) error {
 			return fmt.Errorf("fire: tmux send-keys: %w: %s", err, out)
 		}
 		return nil
-	default:
+	case "", Stdout:
 		if _, err := fmt.Fprintln(Out, cmd); err != nil {
 			return fmt.Errorf("fire: stdout: %w", err)
 		}
 		return nil
+	default:
+		// An unknown target must fail loudly, not silently fall back to stdout —
+		// that would deliver a command somewhere the operator did not choose.
+		return fmt.Errorf("%w %q (want stdout|tmux)", ErrUnknownTarget, t)
 	}
 }
 

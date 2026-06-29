@@ -226,6 +226,28 @@ func TestHistoryRecallReFillsFromSavedVars(t *testing.T) {
 	}
 }
 
+func TestHistoryRecallPreservesRiskMetadata(t *testing.T) {
+	m, store := modelWithHistory(t)
+	// needs-var carries RiskLow in testEngine; recall must rehydrate it, not drop
+	// it to an unspecified bare command.
+	if err := store.Append(history.Entry{
+		ID:       "needs-var",
+		Template: "echo <host>",
+		Vars:     map[string]string{"host": "1.1.1.1"},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	m, _ = send(t, m, "ctrl+r")
+	m, _ = send(t, m, "enter")
+	if m.selected.Risk != format.RiskLow {
+		t.Fatalf("recalled risk = %q, want low (metadata must survive recall)", m.selected.Risk)
+	}
+	// And the stored template still overlays the live command text.
+	if m.selected.Command != "echo <host>" {
+		t.Fatalf("recalled template = %q, want echo <host>", m.selected.Command)
+	}
+}
+
 func TestEmptyHistoryShowsHint(t *testing.T) {
 	m, _ := modelWithHistory(t)
 	m, _ = send(t, m, "ctrl+r")

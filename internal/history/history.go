@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -62,9 +63,10 @@ func DefaultPath() (string, error) {
 }
 
 func isOff(v string) bool {
-	switch v {
-	case "off", "OFF", "Off", "0", "false", "none":
-		return true
+	for _, off := range []string{"off", "0", "false", "none"} {
+		if strings.EqualFold(v, off) {
+			return true
+		}
 	}
 	return false
 }

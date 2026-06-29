@@ -64,6 +64,13 @@ func Run(ctx context.Context, e *engine.Engine, opts Options) error {
 	if opts.DefaultTarget != "" {
 		m.defaultTarget = opts.DefaultTarget
 	}
+	// Validate the fire target before entering the alt-screen. A default that
+	// cannot work here (e.g. --fire=tmux outside tmux) must fail loudly now, not
+	// after the operator has confirmed a command and the UI has torn down.
+	if !m.defaultTarget.Available() {
+		return fmt.Errorf("tui: fire target %q unavailable (not inside a tmux session?)",
+			m.defaultTarget)
+	}
 
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithContext(ctx))
 	final, err := p.Run()
@@ -317,7 +324,15 @@ func (m model) recallEntry(e history.Entry) (tea.Model, tea.Cmd) {
 	for name, val := range e.Vars {
 		m.engine.Vars().Set(name, val)
 	}
-	m.selected = format.Command{ID: e.ID, Command: e.Template}
+	// Rehydrate the live command if it still exists, so the confirm screen keeps
+	// its risk / requires-auth badges; overlay the stored template in case the
+	// command's text has since changed. Fall back to a bare command if it's gone.
+	if cmd, ok := m.engine.Get(e.ID); ok {
+		cmd.Command = e.Template
+		m.selected = cmd
+	} else {
+		m.selected = format.Command{ID: e.ID, Command: e.Template}
+	}
 	m.selectedSheet = e.Sheet
 	return m.beginFill()
 }

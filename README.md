@@ -138,6 +138,8 @@ Versioned, in-repo docs live in [`docs/`](docs/):
 - [CLI reference](docs/cli.md) — every mode and flag.
 - [Cheatsheet schema](docs/schema.md) — the `pkg/format` authoring contract.
 - [MCP setup](docs/mcp.md) — exposing nock to AI agents (Milestone 3).
+- [Contributing](CONTRIBUTING.md) — dev loop, git-flow branching, and the
+  CodeRabbit review workflow (`@coderabbitai review` on PRs to `develop`/`main`).
 
 Narrative and community content (tutorials, FAQ, operator workflows) lives in the
 [Wiki](https://github.com/jessn-dev/nock/wiki).

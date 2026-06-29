@@ -117,6 +117,19 @@ func TestDefaultPathHonoursEnv(t *testing.T) {
 	}
 }
 
+func TestDefaultPathOffIsCaseInsensitive(t *testing.T) {
+	for _, v := range []string{"off", "OFF", "Off", "oFf", "None", "FALSE"} {
+		t.Setenv("NOCK_HISTORY", v)
+		p, err := DefaultPath()
+		if err != nil {
+			t.Fatalf("%q: %v", v, err)
+		}
+		if p != "" {
+			t.Fatalf("NOCK_HISTORY=%q must disable history, got %q", v, p)
+		}
+	}
+}
+
 // TestFileIsOwnerOnly checks the secrets-at-rest guarantee on Unix, where mode
 // bits are enforced. Windows uses an ACL instead (covered by manual review and
 // the openAppend implementation); os.FileMode bits are not meaningful there.

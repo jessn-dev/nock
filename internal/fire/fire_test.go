@@ -82,3 +82,22 @@ func TestEmitTmuxWithoutSessionErrors(t *testing.T) {
 		t.Fatal("emitting to tmux outside a session must error, not silently drop")
 	}
 }
+
+func TestEmitUnknownTargetErrors(t *testing.T) {
+	// A bad target must fail loudly, never silently fall back to stdout.
+	var buf bytes.Buffer
+	old := Out
+	Out = &buf
+	defer func() { Out = old }()
+
+	err := Emit(Target("clipboard"), "id")
+	if err == nil {
+		t.Fatal("unknown target must error")
+	}
+	if !errors.Is(err, ErrUnknownTarget) {
+		t.Fatalf("err = %v, want ErrUnknownTarget", err)
+	}
+	if buf.Len() != 0 {
+		t.Fatalf("unknown target must not write to stdout, got %q", buf.String())
+	}
+}
