@@ -39,9 +39,8 @@ jobs:
         uses: codecov/codecov-action@v7
         with:
           files: ./coverage.txt
+          token: ${{ secrets.CODECOV_TOKEN }} # required — Codecov dropped tokenless uploads
           fail_ci_if_error: false # don't fail the build on a Codecov upload hiccup
-        # Public repo: tokenless upload. If Codecov later requires a token,
-        # add CODECOV_TOKEN as a repo secret and reference it here.
 
   lint:
     name: lint
