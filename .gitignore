@@ -1,7 +1,7 @@
 # Binaries
 /bin/
 /dist/
-nock
+/nock
 *.exe
 *.test
 *.out
