@@ -32,10 +32,16 @@ linux/macOS/windows on amd64/arm64. Download the archive for your platform, veri
 it against `checksums.txt`, extract, and put `nock` on your `PATH`:
 
 ```console
-$ sha256sum -c checksums.txt --ignore-missing   # verify before extracting
+# Linux — verify before extracting
+$ sha256sum -c checksums.txt --ignore-missing
 $ tar xzf nock_*_linux_amd64.tar.gz
 $ ./nock version
 ```
+
+On **macOS** verify with `shasum -a 256 -c checksums.txt --ignore-missing`, then
+`tar xzf`. On **Windows**, check the hash with
+`CertUtil -hashfile nock_<ver>_windows_amd64.zip SHA256` and compare it against
+`checksums.txt` before unzipping.
 
 ## Linux packages (.deb / .rpm / .apk)
 

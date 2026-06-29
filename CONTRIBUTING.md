@@ -74,7 +74,7 @@ files created before a fix kept loose permissions). It is a reviewer, not a gate
 
 PRs into `develop` and `main` are reviewed automatically by
 [CodeRabbit](https://coderabbit.ai), configured in [`.coderabbit.yaml`](.coderabbit.yaml)
-(CHILL profile, scoped to those two base branches). To (re)trigger a pass after
+(assertive profile, scoped to those two base branches). To (re)trigger a pass after
 pushing fixes, comment `@coderabbitai review` on the PR. Treat its findings as
 review input: verify each against the code, fix the valid ones, and say why
 you're skipping the rest.
