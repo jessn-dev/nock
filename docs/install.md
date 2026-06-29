@@ -4,8 +4,8 @@ nock is a single static binary with no runtime dependencies — it builds for
 linux/macOS/windows on amd64/arm64 with `CGO_ENABLED=0`.
 
 > **Status:** building from source and `go install` work today. The release
-> pipeline (GitHub Releases, Homebrew cask, AUR) is wired via GoReleaser and
-> publishes automatically on the first version tag.
+> pipeline (GitHub Releases, Linux packages, and a Homebrew cask) is wired via
+> GoReleaser and publishes automatically on the first version tag.
 
 ## From source
 
@@ -32,8 +32,8 @@ linux/macOS/windows on amd64/arm64. Download the archive for your platform, veri
 it against `checksums.txt`, extract, and put `nock` on your `PATH`:
 
 ```console
+$ sha256sum -c checksums.txt --ignore-missing   # verify before extracting
 $ tar xzf nock_*_linux_amd64.tar.gz
-$ sha256sum -c checksums.txt --ignore-missing
 $ ./nock version
 ```
 
@@ -59,7 +59,7 @@ $ sudo apk add --allow-untrusted nock_*_linux_amd64.apk
 ## Homebrew (macOS / Linux)
 
 ```console
-$ brew install jessn-dev/tap/nock
+$ brew install --cask jessn-dev/tap/nock
 ```
 
 The cask clears the macOS quarantine attribute on install, so nock runs without a

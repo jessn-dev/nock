@@ -90,7 +90,7 @@ make release-snapshot    # build dist/ for every target, publish nothing
 - **GitHub → Releases**: archives, `checksums.txt`, `.deb`/`.rpm`/`.apk`, and SBOM
   are attached; the notes show grouped Features/Fixes plus the install block.
 - `go install github.com/jessn-dev/nock/cmd/nock@v0.1.0` works.
-- If Homebrew is set up: `brew install jessn-dev/tap/nock`.
+- If Homebrew is set up: `brew install --cask jessn-dev/tap/nock`.
 - Spot-check a binary: download, `sha256sum -c checksums.txt --ignore-missing`,
   then `nock version` shows the tag.
 

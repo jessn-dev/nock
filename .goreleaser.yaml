@@ -99,7 +99,7 @@ release:
     go install github.com/jessn-dev/nock/cmd/nock@{{ .Tag }}
     ```
 
-    Or grab a binary / `.deb` / `.rpm` / `.apk` below, or `brew install jessn-dev/tap/nock`.
+    Or grab a binary / `.deb` / `.rpm` / `.apk` below, or `brew install --cask jessn-dev/tap/nock`.
     Full instructions: [docs/install.md](https://github.com/jessn-dev/nock/blob/main/docs/install.md).
 
     Every archive is checksummed and ships an SBOM. Verify:
@@ -116,7 +116,7 @@ release:
 #   1. create the repo  github.com/jessn-dev/homebrew-tap
 #   2. add a repo secret HOMEBREW_TAP_TOKEN (a PAT with `repo` scope on the
 #      tap repo — GITHUB_TOKEN cannot push cross-repo). release.yml passes it through.
-# Then:  brew install jessn-dev/tap/nock
+# Then:  brew install --cask jessn-dev/tap/nock
 homebrew_casks:
   - repository:
       owner: jessn-dev
