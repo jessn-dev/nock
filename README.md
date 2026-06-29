@@ -5,13 +5,15 @@
 [![CodeQL](https://github.com/jessn-dev/nock/actions/workflows/codeql.yml/badge.svg)](https://github.com/jessn-dev/nock/actions/workflows/codeql.yml)
 [![govulncheck](https://github.com/jessn-dev/nock/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/jessn-dev/nock/actions/workflows/govulncheck.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/jessn-dev/nock/badge)](https://securityscorecards.dev/viewer/?uri=github.com/jessn-dev/nock)
-[![codecov](https://codecov.io/gh/jessn-dev/nock/branch/main/graph/badge.svg)](https://codecov.io/gh/jessn-dev/nock)
+[![codecov](https://codecov.io/gh/jessn-dev/nock/graph/badge.svg)](https://codecov.io/gh/jessn-dev/nock)
 [![Go Report Card](https://goreportcard.com/badge/github.com/jessn-dev/nock)](https://goreportcard.com/report/github.com/jessn-dev/nock)
 [![Go Reference](https://pkg.go.dev/badge/github.com/jessn-dev/nock.svg)](https://pkg.go.dev/github.com/jessn-dev/nock)
+[![CodeRabbit](https://img.shields.io/badge/code%20review-CodeRabbit-ff570a)](https://coderabbit.ai)
+[![gitleaks](https://img.shields.io/badge/protected%20by-gitleaks-blue)](https://github.com/gitleaks/gitleaks)
 
 <!-- Release & License -->
 [![Release](https://img.shields.io/github/v/release/jessn-dev/nock?include_prereleases&sort=semver)](https://github.com/jessn-dev/nock/releases)
-[![Downloads](https://img.shields.io/github/downloads/jessn-dev/nock/total)](https://github.com/jessn-dev/nock/releases)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fa6673.svg)](https://www.conventionalcommits.org/en/v1.0.0/)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/jessn-dev/nock)](go.mod)
 [![cheatsheet schema](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fjessn-dev%2Fnock%2Fmain%2Fpkg%2Fformat%2Fschema.json&query=%24.properties.schema_version.const&prefix=v&label=cheatsheet%20schema&color=blue)](pkg/format/schema.json)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
@@ -24,11 +26,6 @@
 [![Open PRs](https://img.shields.io/github/issues-pr/jessn-dev/nock)](https://github.com/jessn-dev/nock/pulls)
 [![Code size](https://img.shields.io/github/languages/code-size/jessn-dev/nock)](https://github.com/jessn-dev/nock)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
-
-<!-- Community / Traffic (privacy-respecting: no third-party trackers) -->
-[![Stars](https://img.shields.io/github/stars/jessn-dev/nock?style=social)](https://github.com/jessn-dev/nock/stargazers)
-[![Forks](https://img.shields.io/github/forks/jessn-dev/nock?style=social)](https://github.com/jessn-dev/nock/network/members)
-[![Watchers](https://img.shields.io/github/watchers/jessn-dev/nock?style=social)](https://github.com/jessn-dev/nock/watchers)
 
 > Nock the command, draw, fire.
 
