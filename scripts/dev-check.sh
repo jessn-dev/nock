@@ -72,18 +72,26 @@ if [ "${FAST:-0}" != "1" ]; then
 	done
 fi
 
-# --- 4. lint (host + Windows build tags) -------------------------------------
+# --- 4. lint (host + every target OS's build-tagged files) -------------------
+# golangci-lint is mandatory here: a "full gate" that silently skips linting would
+# green-light lint-broken changes locally. Fail if it is missing.
+if ! have golangci-lint; then
+	fail "golangci-lint not installed — required for 'make verify' (https://golangci-lint.run)"
+fi
 step "golangci-lint (host)"
-if have golangci-lint; then
-	golangci-lint run ./...
-	ok
-	if [ "${FAST:-0}" != "1" ]; then
-		# Lint the Windows-tagged files too; they are invisible to a host-only run.
-		step "golangci-lint (GOOS=windows)"
-		GOOS=windows golangci-lint run ./... && ok
-	fi
-else
-	warn "golangci-lint not installed (https://golangci-lint.run)"
+golangci-lint run ./...
+ok
+if [ "${FAST:-0}" != "1" ]; then
+	# Lint each target OS so OS-tagged files (e.g. *_windows.go) are covered, not
+	# just the host's. GOARCH rarely changes which files compile, so one run per
+	# unique GOOS is enough.
+	host_os=$($GO env GOOS)
+	# shellcheck disable=SC2086 # word-splitting PLATFORMS is intentional
+	for os in $(printf '%s\n' $PLATFORMS | cut -d/ -f1 | sort -u); do
+		[ "$os" = "$host_os" ] && continue
+		step "golangci-lint (GOOS=$os)"
+		GOOS=$os golangci-lint run ./... && ok
+	done
 fi
 
 # --- 5. cross-build matrix ---------------------------------------------------

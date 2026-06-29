@@ -20,9 +20,10 @@ make run ARGS="search web directories"
 
 `make check` is the fast pre-commit gate but only exercises your host OS. Before
 pushing anything that touches platform-specific code (build-tagged files,
-filesystem permissions, `os/exec`), run **`make verify`** — it cross-builds and
-cross-lints every release target (`linux`, `darwin`, `windows`; `amd64`/`arm64`)
-plus runs coverage and `govulncheck`, catching build-tag and compile breakage the
+filesystem permissions, `os/exec`), run **`make verify`** — it cross-builds every
+release target (`linux`, `darwin`, `windows`; `amd64`/`arm64`), cross-lints each
+target OS (so `*_windows.go` and the like are checked, not just the host's), and
+runs coverage plus `govulncheck`, catching build-tag and compile breakage the
 host-only gate misses. It cannot run another OS's *test suite* (CI does that), but
 it catches the compile/lint failures that otherwise only surface on the runner.
 The script is [`scripts/dev-check.sh`](scripts/dev-check.sh); `FAST=1` skips the
