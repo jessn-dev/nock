@@ -3,8 +3,9 @@
 nock is a single static binary with no runtime dependencies — it builds for
 linux/macOS/windows on amd64/arm64 with `CGO_ENABLED=0`.
 
-> **Status:** building from source works today. Release binaries, Homebrew, and AUR
-> land with the Milestone 2 ship step.
+> **Status:** building from source and `go install` work today. The release
+> pipeline (GitHub Releases, Homebrew cask, AUR) is wired via GoReleaser and
+> publishes automatically on the first version tag.
 
 ## From source
 
@@ -23,23 +24,54 @@ Or install straight to your `GOBIN`:
 $ go install github.com/jessn-dev/nock/cmd/nock@latest
 ```
 
-## Release binaries (Milestone 2)
+## Release binaries
 
-Prebuilt, checksummed archives will be attached to each
-[GitHub Release](https://github.com/jessn-dev/nock/releases). Download the archive
-for your platform, verify the checksum, extract, and put `nock` on your `PATH`.
+Prebuilt, checksummed archives (with an SBOM) are attached to each
+[GitHub Release](https://github.com/jessn-dev/nock/releases) for
+linux/macOS/windows on amd64/arm64. Download the archive for your platform, verify
+it against `checksums.txt`, extract, and put `nock` on your `PATH`:
 
-## Homebrew (Milestone 2)
+```console
+$ tar xzf nock_*_linux_amd64.tar.gz
+$ sha256sum -c checksums.txt --ignore-missing
+$ ./nock version
+```
+
+## Linux packages (.deb / .rpm / .apk)
+
+Native packages for the common ecosystems are attached to each release — no extra
+repo to add. Download the one for your distro and arch, then:
+
+```console
+# Debian / Ubuntu / Kali
+$ sudo dpkg -i nock_*_linux_amd64.deb
+
+# Fedora / RHEL / openSUSE
+$ sudo rpm -i nock_*_linux_amd64.rpm
+
+# Alpine
+$ sudo apk add --allow-untrusted nock_*_linux_amd64.apk
+```
+
+> nock is a single static binary, so it also just runs on **any** Linux distro —
+> if yours isn't listed, grab the `tar.gz` above or use `go install`.
+
+## Homebrew (macOS / Linux)
 
 ```console
 $ brew install jessn-dev/tap/nock
 ```
 
-## Arch (AUR) (Milestone 2)
+The cask clears the macOS quarantine attribute on install, so nock runs without a
+Gatekeeper prompt.
 
-```console
-$ yay -S nock
-```
+## Arch
+
+An AUR package (`nock-bin`) is planned but **not yet published**: the AUR froze new
+maintainer signups in June 2026 after a wave of malicious commits, so we can't
+register it for now. In the meantime, Arch runs the static binary fine — use the
+`tar.gz` from [Releases](https://github.com/jessn-dev/nock/releases) or `go install`
+(both above). The AUR package lands once signups reopen.
 
 ## First run
 

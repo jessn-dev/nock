@@ -87,6 +87,16 @@ check: fmt vet lint test
 verify:
 	./scripts/dev-check.sh
 
+## release-check: validate the GoReleaser config
+.PHONY: release-check
+release-check:
+	goreleaser check
+
+## release-snapshot: build a local release (dist/) without publishing
+.PHONY: release-snapshot
+release-snapshot:
+	goreleaser release --snapshot --clean
+
 ## clean: remove build artifacts
 .PHONY: clean
 clean:

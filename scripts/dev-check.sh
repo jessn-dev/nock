@@ -117,7 +117,15 @@ else
 	$GO run golang.org/x/vuln/cmd/govulncheck@latest ./... && ok
 fi
 
-# --- 8. secrets (optional) ---------------------------------------------------
+# --- 8. release config (optional) --------------------------------------------
+step "goreleaser check (optional)"
+if have goreleaser; then
+	goreleaser check && ok
+else
+	warn "goreleaser not installed — release config validated in CI on tag"
+fi
+
+# --- 9. secrets (optional) ---------------------------------------------------
 step "gitleaks (optional)"
 if have gitleaks; then
 	gitleaks detect --no-banner --redact && ok

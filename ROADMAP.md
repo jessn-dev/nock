@@ -119,18 +119,25 @@ type Provider interface {
 - [ ] `nock` CLI: minimal non-interactive resolve (prove engine end-to-end)
 
 ### Milestone 2 — TUI (shippable v1)
-- [ ] bubbletea list + search + var prompts
-- [ ] **Show-before-fire (security, hard rule):** always display the fully-resolved command
+- [x] bubbletea list + search + var prompts — interactive search → fill → confirm loop (#5, #8)
+- [x] **Show-before-fire (security, hard rule):** always display the fully-resolved command
       to the operator before any execution/prefill. What is displayed must equal what runs —
       no hidden expansion, no auto-execution. This is the primary mitigation for the
       malicious-cheatsheet injection vector and must be designed in now, not retrofitted.
+      Implemented as print/prefill-on-confirm only (#8); ADR 015.
 - [x] tmux pane / prefill-into-shell output (prefill into the shell line, operator hits Enter —
       never auto-run on nock's behalf) — `--fire=stdout|tmux` + per-command `ctrl+t` override;
       tmux uses `send-keys -l` (no Enter), gated on `$TMUX` so it never fires where it can't work
 - [x] command history — recall with `ctrl+r`; stores template + var bindings (never the
       flattened resolved string), owner-only on every OS (0600 / Windows owner DACL),
       `NOCK_HISTORY=off` disables
-- [ ] Ship: GitHub Releases, Homebrew tap, `go install`, AUR
+- [x] Ship: GitHub Releases, Homebrew tap, `go install`, AUR — GoReleaser pipeline
+      (all platforms, checksums, SBOM, changelog), `.deb`/`.rpm`/`.apk` via nfpm
+      (Debian/Ubuntu/Kali, Fedora/RHEL, Alpine), Homebrew cask, `go install` works today.
+      The static binary runs on any distro regardless. Publishes on first version tag;
+      Homebrew needs the tap repo + `HOMEBREW_TAP_TOKEN` (Releases + .deb/.rpm/.apk
+      need none). AUR (`nock-bin`) is wired but disabled — AUR froze new signups (Jun 2026,
+      malicious-commit wave); re-enable when registration reopens.
 - [ ] **Launch-day: enable GitHub Discussions** (community + traction, feeds the funding
       story — sponsors/grants want a visible community). Categories: Announcements,
       Cheatsheets (share/request sheets — seeds the M5 team-sync content library and proves
