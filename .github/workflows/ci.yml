@@ -36,7 +36,7 @@ jobs:
         run: go test -race -covermode=atomic -coverprofile=coverage.txt ./...
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           files: ./coverage.txt
           fail_ci_if_error: false # don't fail the build on a Codecov upload hiccup
