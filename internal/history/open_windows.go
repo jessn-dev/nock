@@ -57,29 +57,23 @@ func openAppend(path string) (*os.File, error) {
 	return os.NewFile(uintptr(h), path), nil
 }
 
-// enforceOwnerOnly reapplies the owner, group, and protected DACL from sd onto an
+// enforceOwnerOnly reapplies the protected, owner-only DACL from sd onto an
 // already-open handle, so an existing file's permissions are corrected rather
-// than inherited. Failing here is fail-closed: the caller discards the handle.
+// than inherited. Only the DACL is set: the creating user is already the owner,
+// and rewriting the owner at runtime needs SeRestorePrivilege (denied to ordinary
+// processes, e.g. CI runners). The DACL is what actually gates access, so locking
+// it down is sufficient. Failing here is fail-closed: the caller discards the
+// handle rather than write secrets to a wrongly-permissioned file.
 func enforceOwnerOnly(h windows.Handle, sd *windows.SECURITY_DESCRIPTOR) error {
-	owner, _, err := sd.Owner()
-	if err != nil {
-		return fmt.Errorf("history: read owner: %w", err)
-	}
-	group, _, err := sd.Group()
-	if err != nil {
-		return fmt.Errorf("history: read group: %w", err)
-	}
 	dacl, _, err := sd.DACL()
 	if err != nil {
 		return fmt.Errorf("history: read dacl: %w", err)
 	}
 	info := windows.SECURITY_INFORMATION(
-		windows.OWNER_SECURITY_INFORMATION |
-			windows.GROUP_SECURITY_INFORMATION |
-			windows.DACL_SECURITY_INFORMATION |
+		windows.DACL_SECURITY_INFORMATION |
 			windows.PROTECTED_DACL_SECURITY_INFORMATION,
 	)
-	if err := windows.SetSecurityInfo(h, windows.SE_FILE_OBJECT, info, owner, group, dacl, nil); err != nil {
+	if err := windows.SetSecurityInfo(h, windows.SE_FILE_OBJECT, info, nil, nil, dacl, nil); err != nil {
 		return fmt.Errorf("history: enforce owner-only acl: %w", err)
 	}
 	return nil
