@@ -124,9 +124,12 @@ type Provider interface {
       to the operator before any execution/prefill. What is displayed must equal what runs —
       no hidden expansion, no auto-execution. This is the primary mitigation for the
       malicious-cheatsheet injection vector and must be designed in now, not retrofitted.
-- [ ] tmux pane / prefill-into-shell output (prefill into the shell line, operator hits Enter —
-      never auto-run on nock's behalf)
-- [ ] command history
+- [x] tmux pane / prefill-into-shell output (prefill into the shell line, operator hits Enter —
+      never auto-run on nock's behalf) — `--fire=stdout|tmux` + per-command `ctrl+t` override;
+      tmux uses `send-keys -l` (no Enter), gated on `$TMUX` so it never fires where it can't work
+- [x] command history — recall with `ctrl+r`; stores template + var bindings (never the
+      flattened resolved string), owner-only on every OS (0600 / Windows owner DACL),
+      `NOCK_HISTORY=off` disables
 - [ ] Ship: GitHub Releases, Homebrew tap, `go install`, AUR
 - [ ] **Launch-day: enable GitHub Discussions** (community + traction, feeds the funding
       story — sponsors/grants want a visible community). Categories: Announcements,

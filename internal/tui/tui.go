@@ -21,8 +21,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/jessn-dev/nock/internal/engine"
+	"github.com/jessn-dev/nock/internal/fire"
+	"github.com/jessn-dev/nock/internal/history"
 	"github.com/jessn-dev/nock/pkg/format"
 )
+
+// maxHistory bounds how many recent entries the recall screen loads and draws.
+const maxHistory = 20
 
 // maxVisible bounds how many search results are drawn at once; the list scrolls
 // around the cursor beyond that.
@@ -35,24 +40,57 @@ const (
 	stageSearch  stage = iota // typing a query, navigating results
 	stageVars                 // prompting for the selected command's missing variables
 	stageConfirm              // showing the fully resolved command before firing
+	stageHistory              // browsing recently fired commands to recall one
 )
 
+// Options configures the TUI's side-effecting edges. Both are optional: a nil
+// History disables persistence and an empty DefaultTarget falls back to stdout,
+// so the zero Options keeps the original print-to-stdout behaviour.
+type Options struct {
+	// History records fired commands for later recall. Nil means no persistence.
+	History *history.Store
+	// DefaultTarget is where Enter on the confirm screen delivers the command.
+	DefaultTarget fire.Target
+}
+
 // Run starts the interactive TUI against the given engine. It blocks until the
-// operator quits. If a command was confirmed, its fully resolved form is printed
-// to stdout after the UI tears down, so a shell can capture it.
-func Run(ctx context.Context, e *engine.Engine) error {
+// operator quits. If a command was confirmed, it is delivered to the chosen fire
+// target after the UI tears down (stdout by default) and recorded to history.
+func Run(ctx context.Context, e *engine.Engine, opts Options) error {
 	m := newModel(e)
+	if opts.History != nil {
+		m.hist = opts.History
+	}
+	if opts.DefaultTarget != "" {
+		m.defaultTarget = opts.DefaultTarget
+	}
+	// Validate the fire target before entering the alt-screen. A default that
+	// cannot work here (e.g. --fire=tmux outside tmux) must fail loudly now, not
+	// after the operator has confirmed a command and the UI has torn down.
+	if !m.defaultTarget.Available() {
+		return fmt.Errorf("tui: fire target %q unavailable (not inside a tmux session?)",
+			m.defaultTarget)
+	}
+
 	p := tea.NewProgram(m, tea.WithAltScreen(), tea.WithContext(ctx))
 	final, err := p.Run()
 	if err != nil {
 		return fmt.Errorf("tui: %w", err)
 	}
-	if fm, ok := final.(model); ok && fm.emit != "" {
-		// Printed to the normal screen after the alt-screen UI is gone: this is the
-		// command the operator confirmed, ready to run. nock does not run it.
-		if _, werr := fmt.Fprintln(os.Stdout, fm.emit); werr != nil {
-			return fmt.Errorf("tui: emit command: %w", werr)
-		}
+	fm, ok := final.(model)
+	if !ok || fm.emit == "" {
+		return nil
+	}
+
+	// Record before delivering: history is the operator's own audit trail and must
+	// not be lost if delivery to an external target (tmux) errors.
+	if werr := fm.hist.Append(fm.firedEntry()); werr != nil {
+		fmt.Fprintf(os.Stderr, "nock: warning recording history: %v\n", werr)
+	}
+	// Delivered after the alt-screen UI is gone. nock does not run the command;
+	// stdout prints it, tmux prefills it — the operator fires it.
+	if werr := fire.Emit(fm.target, fm.emit); werr != nil {
+		return fmt.Errorf("tui: fire command: %w", werr)
 	}
 	return nil
 }
@@ -68,13 +106,24 @@ type model struct {
 	cursor  int // index into results
 	offset  int // first visible result, for scrolling
 
-	selected format.Command // the command being filled / confirmed
-	missing  []string       // its still-unbound variables, in prompt order
-	varIdx   int            // which missing variable is being prompted
+	selected      format.Command // the command being filled / confirmed
+	selectedSheet string         // its source cheatsheet, for the history record
+	missing       []string       // its still-unbound variables, in prompt order
+	varIdx        int            // which missing variable is being prompted
 
 	resolved string // fully resolved command shown on the confirm screen
 	emit     string // set when the operator confirms; printed after teardown
 	status   string // transient hint / error line
+
+	// Fire + history wiring. target is where the confirmed command is delivered;
+	// it starts at defaultTarget and the confirm screen can override it per-command.
+	hist          *history.Store
+	defaultTarget fire.Target
+	target        fire.Target
+
+	// History recall (stageHistory): entries loaded newest-first, browsed by cursor.
+	histEntries []history.Entry
+	histCursor  int
 
 	width, height int
 }
@@ -88,9 +137,33 @@ func newModel(e *engine.Engine) model {
 	v := textinput.New()
 	v.Prompt = "› "
 
-	m := model{engine: e, query: q, varIn: v}
+	m := model{
+		engine:        e,
+		query:         q,
+		varIn:         v,
+		hist:          history.New(""), // no-op sink until Run wires a real store
+		defaultTarget: fire.Stdout,
+	}
 	m.results = e.Search("") // empty query lists everything in corpus order
 	return m
+}
+
+// firedEntry captures the just-confirmed command as a history record: the
+// template and the variable bindings it used, never the flattened resolved
+// string (see internal/history secrets-at-rest note).
+func (m model) firedEntry() history.Entry {
+	binds := make(map[string]string, len(m.selected.Vars()))
+	for _, name := range m.selected.Vars() {
+		if v, ok := m.engine.Vars().Get(name); ok {
+			binds[name] = v
+		}
+	}
+	return history.Entry{
+		Sheet:    m.selectedSheet,
+		ID:       m.selected.ID,
+		Template: m.selected.Command,
+		Vars:     binds,
+	}
 }
 
 // Init satisfies tea.Model; it starts the text-input cursor blink.
@@ -111,6 +184,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateVars(msg)
 		case stageConfirm:
 			return m.updateConfirm(msg)
+		case stageHistory:
+			return m.updateHistory(msg)
 		}
 	}
 	return m, nil
@@ -120,6 +195,8 @@ func (m model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "ctrl+c", "esc":
 		return m, tea.Quit
+	case "ctrl+r":
+		return m.openHistory()
 	case "up", "ctrl+k":
 		m.moveCursor(-1)
 		return m, nil
@@ -131,6 +208,7 @@ func (m model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.selected = m.results[m.cursor].Command
+		m.selectedSheet = m.results[m.cursor].Sheet
 		return m.beginFill()
 	}
 	// Any other key edits the query; re-search and reset the cursor.
@@ -175,11 +253,88 @@ func (m model) updateConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.backToSearch(), nil
 	case "enter":
 		// Show-before-fire: only here, on an explicit keypress against the displayed
-		// command, does anything leave nock — and only to stdout, never executed.
+		// command, does anything leave nock — delivered to the default target,
+		// never executed by nock.
 		m.emit = m.resolved
+		m.target = m.defaultTarget
+		return m, tea.Quit
+	case "ctrl+t":
+		// Per-command override to tmux prefill. Refused (with a hint) when not in a
+		// tmux session, so the operator never fires into a target that would error.
+		if !fire.Tmux.Available() {
+			m.status = "not inside a tmux session ($TMUX unset)"
+			return m, nil
+		}
+		m.emit = m.resolved
+		m.target = fire.Tmux
 		return m, tea.Quit
 	}
 	return m, nil
+}
+
+// openHistory loads recent entries and switches to the recall screen. A load
+// error is surfaced on the search screen rather than dropping the operator into
+// an empty list with no explanation.
+func (m model) openHistory() (tea.Model, tea.Cmd) {
+	entries, err := m.hist.Recent(maxHistory)
+	if err != nil {
+		m.status = "history: " + err.Error()
+		return m, nil
+	}
+	m.histEntries = entries
+	m.histCursor = 0
+	m.status = ""
+	m.stage = stageHistory
+	return m, nil
+}
+
+// updateHistory drives the recall screen: navigate entries, then Enter to reload
+// a past command back into the fill flow (re-binding its saved variables through
+// the engine so the operator can edit them before firing — nothing auto-fires).
+func (m model) updateHistory(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "ctrl+c":
+		return m, tea.Quit
+	case "esc":
+		return m.backToSearch(), nil
+	case "up", "ctrl+k":
+		if m.histCursor > 0 {
+			m.histCursor--
+		}
+		return m, nil
+	case "down", "ctrl+j":
+		if m.histCursor < len(m.histEntries)-1 {
+			m.histCursor++
+		}
+		return m, nil
+	case "enter":
+		if len(m.histEntries) == 0 {
+			return m, nil
+		}
+		return m.recallEntry(m.histEntries[m.histCursor])
+	}
+	return m, nil
+}
+
+// recallEntry seeds the engine's var store with a past command's saved bindings
+// and re-enters the fill flow. Pre-bound variables are skipped by beginFill's
+// Missing() check, so the operator lands straight on confirm for an unchanged
+// recall — still shown before firing.
+func (m model) recallEntry(e history.Entry) (tea.Model, tea.Cmd) {
+	for name, val := range e.Vars {
+		m.engine.Vars().Set(name, val)
+	}
+	// Rehydrate the live command if it still exists, so the confirm screen keeps
+	// its risk / requires-auth badges; overlay the stored template in case the
+	// command's text has since changed. Fall back to a bare command if it's gone.
+	if cmd, ok := m.engine.Get(e.ID); ok {
+		cmd.Command = e.Template
+		m.selected = cmd
+	} else {
+		m.selected = format.Command{ID: e.ID, Command: e.Template}
+	}
+	m.selectedSheet = e.Sheet
+	return m.beginFill()
 }
 
 // beginFill computes the selected command's missing variables and either prompts
@@ -264,6 +419,8 @@ func (m model) View() string {
 		return m.viewVars()
 	case stageConfirm:
 		return m.viewConfirm()
+	case stageHistory:
+		return m.viewHistory()
 	default:
 		return m.viewSearch()
 	}
@@ -294,7 +451,7 @@ func (m model) viewSearch() string {
 	if m.status != "" {
 		b.WriteString("\n" + statusStyle.Render(m.status) + "\n")
 	}
-	b.WriteString("\n" + helpStyle.Render("type to filter · ↑/↓ move · enter select · esc quit"))
+	b.WriteString("\n" + helpStyle.Render("type to filter · ↑/↓ move · enter select · ctrl+r history · esc quit"))
 	return b.String()
 }
 
@@ -325,9 +482,45 @@ func (m model) viewConfirm() string {
 	}
 	b.WriteString("\n\n")
 	b.WriteString("  " + resolvedStyle.Render(m.resolved) + "\n\n")
-	b.WriteString(dimStyle.Render("  nock will print this command to stdout. It does not run it —\n"))
+	dest := "print to stdout"
+	if m.defaultTarget == fire.Tmux {
+		dest = "prefill into this tmux pane"
+	}
+	fmt.Fprintf(&b, "%s\n", dimStyle.Render("  nock will "+dest+". It does not run it —"))
 	b.WriteString(dimStyle.Render("  you do. Review it before you fire.") + "\n")
-	b.WriteString("\n" + helpStyle.Render("enter fire (print) · esc back · ctrl+c quit"))
+
+	help := "enter fire · esc back · ctrl+c quit"
+	if fire.Tmux.Available() {
+		// Offer the per-command tmux override only where it can actually work.
+		help = "enter fire · ctrl+t fire→tmux · esc back · ctrl+c quit"
+	}
+	if m.status != "" {
+		b.WriteString("\n" + statusStyle.Render("  "+m.status) + "\n")
+	}
+	b.WriteString("\n" + helpStyle.Render(help))
+	return b.String()
+}
+
+// viewHistory renders the recall screen: recently fired commands, newest first,
+// each shown as its resolved-looking template so the operator recognises it.
+func (m model) viewHistory() string {
+	var b strings.Builder
+	b.WriteString(titleStyle.Render("nock") + dimStyle.Render(" — history") + "\n\n")
+	if len(m.histEntries) == 0 {
+		b.WriteString(dimStyle.Render("  no history yet") + "\n")
+		b.WriteString("\n" + helpStyle.Render("esc back · ctrl+c quit"))
+		return b.String()
+	}
+	for i, e := range m.histEntries {
+		prefix := "  "
+		if i == m.histCursor {
+			prefix = cursorStyle.Render("› ")
+		}
+		when := e.Time.Local().Format("01-02 15:04")
+		b.WriteString(prefix + dimStyle.Render(when) + "  " + selectedStyle.Render(e.ID) +
+			"  " + dimStyle.Render(e.Template) + "\n")
+	}
+	b.WriteString("\n" + helpStyle.Render("↑/↓ move · enter recall · esc back · ctrl+c quit"))
 	return b.String()
 }
 

@@ -30,3 +30,20 @@ Out of scope:
 
 nock reads AI provider API keys from environment variables and never writes them to
 disk, logs, or cheatsheet files. Report any deviation as a vulnerability.
+
+## Automated security testing
+
+Every pull request into `develop` and `main` runs a free, industry-standard
+security stack in CI — the same baseline enterprises use at the free tier:
+
+| Check | Tool | What it catches |
+|---|---|---|
+| SAST (Go) | [gosec](https://github.com/securego/gosec) via golangci-lint | injection, weak crypto, unsafe file perms |
+| SAST (deep) | [CodeQL](https://codeql.github.com) (`security-and-quality`) | data-flow vulnerabilities |
+| Dependency CVEs | [govulncheck](https://pkg.go.dev/golang.org/x/vuln) + Dependabot | known vulns in pinned deps |
+| Secrets | [gitleaks](https://github.com/gitleaks/gitleaks) | API keys/tokens committed to history |
+| Supply chain | [OpenSSF Scorecard](https://github.com/ossf/scorecard) | project security posture |
+
+gosec and govulncheck gate every PR; CodeQL and gitleaks cover both merge hops
+(`feature -> develop` and `develop -> main`). The binary is built `CGO_ENABLED=0`
+with `-trimpath`; releases ship checksums and an SBOM.
