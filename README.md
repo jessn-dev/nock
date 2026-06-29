@@ -45,6 +45,15 @@ rebuilt from scratch: engine-first, agent-native, vendor-neutral. See
 > ⚠️ For **authorized** security testing only. You are responsible for having
 > permission to run what you launch. See [`SECURITY.md`](SECURITY.md).
 
+## The problem
+
+Mid-engagement, you burn seconds you don't have recalling the exact flags — or
+your cheatsheets rot in a scratch file you `grep` by hand and re-type. When recall
+is slower than just remembering it, the tool has failed.
+
+nock makes recall instant: fuzzy-search the command, set your target once, review
+the fully-resolved line, fire. Same knowledge, two keystrokes instead of twenty.
+
 ## Why nock
 
 - **Single static binary** (Go) — instant startup, trivial distribution, no
@@ -59,6 +68,20 @@ rebuilt from scratch: engine-first, agent-native, vendor-neutral. See
   fully offline / air-gapped path.
 - **Graceful degradation** — fuzzy search needs no AI and no network. AI ranking
   layers on only when configured.
+
+## At a glance
+
+|                                   | raw notes | arsenal | nock |
+| --------------------------------- | :-------: | :-----: | :--: |
+| Set a variable once, fill it everywhere |    🔴     |   🟢    |  🟢  |
+| Single static binary, no runtime drift  |    —      |   🔴    |  🟢  |
+| Works offline / air-gapped              |    🟢     |   🟢    |  🟢  |
+| Optional AI ranking                     |    🔴     |   🔴    |  🟢  |
+| MCP / agent-native (query from Claude, Cursor…) | 🔴 | 🔴 |  🟢  |
+
+[arsenal](https://github.com/Orange-Cyberdefense/arsenal) pioneered fast command
+recall; nock keeps the idea and modernizes the architecture — engine-first,
+agent-native, single Go binary.
 
 ## Status
 
@@ -90,6 +113,23 @@ Point nock at your own cheatsheets:
 export NOCK_CHEATSHEETS=/path/to/your/cheatsheets
 ./bin/nock search smb
 ```
+
+## What it feels like
+
+The interactive TUI (Milestone 2) is the search → fill → fire loop end to end:
+
+```
+› nmap serv                 # fuzzy-search as you type
+  [recon] nmap-service-scan  nmap -sV -sC -oA scans/<target> <target>
+
+<target> = 10.0.0.5         # fill each variable once
+
+✓ nmap -sV -sC -oA scans/10.0.0.5 10.0.0.5   # review the resolved line, then fire
+```
+
+Nothing runs until you confirm, and what's shown is exactly what's emitted — no
+hidden expansion ([show-before-fire](SECURITY.md)). _An asciinema recording lands
+with the TUI._
 
 ## Modes
 
