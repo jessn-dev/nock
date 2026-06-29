@@ -1,0 +1,38 @@
+name: gitleaks
+
+# Secret scanning — mechanically enforces nock's hard rule that API keys never
+# land in commits, logs, or history. Gitleaks is the de-facto OSS secret scanner
+# and is free for public repositories.
+#
+# Scoped to both git-flow merge hops: PRs into develop (feature -> develop) and
+# into main (develop -> main), plus a weekly sweep that catches a secret pattern
+# disclosed after it was committed. Report-only for now: this check is intentionally
+# NOT a required status check yet — let it run and annotate while false positives
+# are tuned, then promote it to required in branch protection.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: "13 6 * * 1" # weekly, Monday 06:13 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write # post the findings summary on the PR
+  security-events: write # upload SARIF to the Security tab
+
+jobs:
+  scan:
+    name: scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history so PR-range and push diffs are scanned
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
