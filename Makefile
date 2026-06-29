@@ -82,6 +82,21 @@ tidy:
 .PHONY: check
 check: fmt vet lint test
 
+## verify: full CI mirror incl. cross-platform build/lint (scripts/dev-check.sh)
+.PHONY: verify
+verify:
+	./scripts/dev-check.sh
+
+## release-check: validate the GoReleaser config
+.PHONY: release-check
+release-check:
+	goreleaser check
+
+## release-snapshot: build a local release (dist/) without publishing
+.PHONY: release-snapshot
+release-snapshot:
+	goreleaser release --snapshot --clean
+
 ## clean: remove build artifacts
 .PHONY: clean
 clean:

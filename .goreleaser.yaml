@@ -36,6 +36,26 @@ archives:
       - NOTICE
       - README.md
 
+# Linux distro packages. nfpm needs no external account — the .deb/.rpm/.apk are
+# built locally and attached to the GitHub Release, covering the apt (Debian,
+# Ubuntu, Kali), dnf/yum (Fedora, RHEL), and apk (Alpine) ecosystems. The static
+# CGO_ENABLED=0 binary runs on any distro regardless; these just add native install.
+nfpms:
+  - id: nock
+    package_name: nock
+    vendor: jessn-dev
+    homepage: https://github.com/jessn-dev/nock
+    maintainer: jessn-dev <jessengolab.dev@gmail.com>
+    description: "AI-aware command launcher for pentesters and operators"
+    license: Apache-2.0
+    formats: [deb, rpm, apk]
+    bindir: /usr/bin
+    contents:
+      - src: LICENSE
+        dst: /usr/share/licenses/nock/LICENSE
+      - src: README.md
+        dst: /usr/share/doc/nock/README.md
+
 checksum:
   name_template: checksums.txt
 
@@ -58,16 +78,79 @@ changelog:
     - title: Others
       order: 99
   filters:
+    # Scope-aware: also drops chore(deps):, docs(cli):, etc. from the notes.
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore:'
+      - '^(docs|test|chore|ci|build|style|refactor)(\(.+\))?:'
+      - '^Merge '
 
-# Homebrew tap — uncomment and create the tap repo when ready to ship Milestone 2.
-# brews:
-#   - repository:
-#       owner: jessn-dev
-#       name: homebrew-tap
+# Release notes are fully auto-generated: the grouped changelog above (from
+# Conventional Commits) sits between this templated header and footer. No manual
+# editing per release. `prerelease: auto` flags vX.Y.Z-rc/-beta tags as prereleases.
+release:
+  draft: false
+  prerelease: auto
+  header: |
+    **nock {{ .Tag }}** — AI-aware command launcher for pentesters and operators.
+    Single static binary, works offline, agent-native over MCP.
+  footer: |
+    ## Install
+
+    ```bash
+    go install github.com/jessn-dev/nock/cmd/nock@{{ .Tag }}
+    ```
+
+    Or grab a binary / `.deb` / `.rpm` / `.apk` below, or `brew install --cask jessn-dev/tap/nock`.
+    Full instructions: [docs/install.md](https://github.com/jessn-dev/nock/blob/main/docs/install.md).
+
+    Every archive is checksummed and ships an SBOM. Verify:
+
+    ```bash
+    sha256sum -c checksums.txt --ignore-missing
+    ```
+
+    🤖 Cheatsheets are untrusted input — nock shows the resolved command and never
+    auto-runs. Review every command before you fire it.
+
+# Homebrew tap (cask — `brews` is deprecated in GoReleaser v2). Activates on the
+# first real tag. Prerequisites (one-time, external):
+#   1. create the repo  github.com/jessn-dev/homebrew-tap
+#   2. add a repo secret HOMEBREW_TAP_TOKEN (a PAT with `repo` scope on the
+#      tap repo — GITHUB_TOKEN cannot push cross-repo). release.yml passes it through.
+# Then:  brew install --cask jessn-dev/tap/nock
+homebrew_casks:
+  - repository:
+      owner: jessn-dev
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    homepage: https://github.com/jessn-dev/nock
+    description: "AI-aware command launcher for pentesters and operators"
+    license: Apache-2.0
+    binaries: [nock]
+    hooks:
+      post:
+        # The release binary is unsigned; clear the quarantine attribute so macOS
+        # Gatekeeper does not block the first run of a Homebrew-installed nock.
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/nock"]
+          end
+
+# Arch User Repository — DISABLED for now. The AUR froze new-account signups (June
+# 2026, after a wave of malicious package commits), so the `nock-bin` package can't
+# be registered yet. Arch users use the static release binary or `go install` in the
+# meantime; Arch is a rolling distro and runs the CGO_ENABLED=0 binary fine.
+# To re-enable once signups reopen: register the account + add the AUR_KEY secret
+# (SSH private key), then uncomment. release.yml already passes AUR_KEY through.
+# aurs:
+#   - name: nock-bin
 #     homepage: https://github.com/jessn-dev/nock
 #     description: "AI-aware command launcher for pentesters and operators"
 #     license: Apache-2.0
+#     maintainers:
+#       - "jessn-dev <jessengolab.dev@gmail.com>"
+#     private_key: "{{ .Env.AUR_KEY }}"
+#     git_url: "ssh://aur@aur.archlinux.org/nock-bin.git"
+#     package: |-
+#       install -Dm755 "./nock" "${pkgdir}/usr/bin/nock"
+#       install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/nock/LICENSE"
+#       install -Dm644 "./README.md" "${pkgdir}/usr/share/doc/nock/README.md"

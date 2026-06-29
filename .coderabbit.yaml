@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# CodeRabbit configuration for nock.
+# Reviews are scoped to the git-flow integration branches: pull requests INTO
+# `develop` (feature -> develop) and INTO `main` (develop -> main). On those PRs a
+# review can be (re)triggered any time by commenting `@coderabbitai review`.
+language: en-US
+early_access: false
+
+reviews:
+  # ASSERTIVE surfaces more findings, including lower-confidence nitpicks — chosen
+  # deliberately for a solo, security-sensitive project where a second reviewer's
+  # breadth matters more than a quiet PR.
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    # Only PRs targeting these branches are reviewed: feature -> develop, and the
+    # develop -> main release PR. PRs to other bases are left alone.
+    base_branches:
+      - develop
+      - main
+
+chat:
+  auto_reply: true
